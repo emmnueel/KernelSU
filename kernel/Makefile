@@ -37,6 +37,11 @@ ifeq ($(shell grep -q "struct selinux_state " $(srctree)/security/selinux/includ
 ccflags-y += -DKSU_COMPAT_HAS_SELINUX_STATE
 endif
 
+# TODO: using pts_inode->i_rdev is not guaranteed.
+ifeq ($(shell grep -q "pts_inode->i_rdev" $(srctree)/fs/devpts/inode.c; echo $$?),0)
+ccflags-y += -DKSU_COMPAT_DEVPTS_PRIV_HAS_PTS_INODE
+endif
+
 ifndef KSU_EXPECTED_SIZE
 KSU_EXPECTED_SIZE := 0x033b
 endif

@@ -182,10 +182,24 @@ int ksu_handle_devpts(struct inode *inode)
 
 	if (!ksu_is_allow_uid(uid))
 		return 0;
-
+		
 	if (ksu_devpts_sid) {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 1, 0)
 		struct inode_security_struct *sec = selinux_inode(inode);
+#elif defined(KSU_COMPAT_DEVPTS_PRIV_HAS_PTS_INODE)
+/*
+ * Before 4.6-rc6, devpts_get_priv use pts_inode as struct,
+ * instead of dentry.
+ *
+ * Patch for hooks changed from this:
+ * + ksu_handle_devpts(dentry->d_inode);
+ * to:
+ * + ksu_handle_devpts(pts_inode->i_security);
+ *
+ * WARNING: Untested.
+ */
+		struct inode_security_struct *sec =
+			(struct inode_security_struct *)inode;
 #else
 		struct inode_security_struct *sec =
 			(struct inode_security_struct *)inode->i_security;
